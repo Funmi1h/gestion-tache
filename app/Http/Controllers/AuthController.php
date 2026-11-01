@@ -2,88 +2,90 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Invitation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    //la fonction d#inscription 
+    public function showRegister(Request $request)
+    {
+        return view('auth.register', [
+            'invitationToken' => $request->query('invitation_token'),
+        ]);
+    }
+
+    // la fonction d'inscription
     public function register(Request $request)
     {
-        //on vérfie les données  
-        $request->validate([
+        // on vérifie les données
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'first_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'invitation_token' => 'nullable|string', // optionnel dans le cas ou la personne s'inscrit depuis l'interface sans lien d#invitation
+            'invitation_token' => 'nullable|string',
         ]);
 
-        //on créer le user
         $user = User::create([
-            'name' => $request->nom,
-            'first_name' => $request->prenom,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $validated['name'],
+            'first_name' => $validated['first_name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
         ]);
 
-        //lorsque le user s'inscrit via un lien d'invitation
-        //on vérifie d'abord si dans le formulaire d'inscription il y a un invitation_token qui a été envoyé
-        if($request->filled('invitation_token')){
-            $invitation = Invitation::where('token', $request->filled('invitation_token'))
-            ->where('email', $request->email)
-            ->where('date_expiration', '>', now())
-            ->first();
+
+        if (!empty($validated['invitation_token'])) {
+            $invitation = Invitation::where('token', $validated['invitation_token'])
+                ->where('email', $validated['email'])
+                ->where('statut', 'en_attente')
+                ->where('date_expiration', '>', now())
+                ->first();
+
+            if ($invitation) {
+                $user->equipes()->attach($invitation->equipe_id, ['role' => 'membre']);
+                $invitation->update(['statut' => 'acceptee']);
+            }
         }
 
-        if($invitation){
-            //on lie le user a l'équipe auquel on a invité a rejoindre
-            $user->equipes()->attach($invitation->equipe_id, ['role'=>'memebre']);
-            //on change le statut de l'utilisateur 
-            $invitation->update(['statut'=> 'acceptee']);
-        }
+        Auth::login($user);
+        $request->session()->regenerate();
 
+        return redirect()
+            ->route('dashboard')
+            ->with('status', 'Compte créé avec succès. Bienvenue sur Taskflow !');
+    }
 
-        //on genere le token parce que vu que la personne vient de se connecter on ne va pas  lui demander de se reconnecter (vu que'on envoie meme pas de mail)
-        $token = $user->createToken('auth_token')->plaintTextToken;
-        
-        return response()->json([
-            'message'=>'Compte créé avec succes',
-            'access_token'=>$token,
-            'user'=> $user
-        ], 201);
+    public function showLogin()
+    {
+        return view('auth.login');
     }
 
     public function login(Request $request)
     {
-        $request->validate([
-            'email'=> 'request|email',
+        $credentials = $request->validate([
+            'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
-        if(!user || ! Hash::check($request->password,$user->password)){
-            throw ValidationException::withMessages([
-                'email'=> ['Les identifiants fournis sont incorrects.'],
-            ]);
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+
+            return redirect()->intended(route('dashboard'));
         }
 
-        $token = $user->createToken('auth_token')->plantTextToken;
-
-        return response()->json([
-            'access_token'=>$token,
-            'token_type'=> 'Bearer',
-            'user'=>$user
-        ]);
+        return back()
+            ->withInput($request->only('email'))
+            ->withErrors(['email' => 'Identifiants incorrects.']);
     }
-
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return response()->json([
-            'message' => 'Déconnexion réussie'
-        ]);
+        return redirect()->route('home');
     }
-    
 }
