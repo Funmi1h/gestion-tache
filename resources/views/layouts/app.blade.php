@@ -18,24 +18,26 @@
             <span class="logo"></span>
             Taskflow
         </a>
-        <nav class="tabs" aria-label="Navigation principale">
-            @php
-                $tabs = [
-                    'Aperçu' => 'dashboard',
-                    'Projets' => 'projects',
-                    'Tâches' => 'tasks',
-                    'Activité' => 'activity',
-                    'Équipe' => 'team',
-                ];
-            @endphp
-            @foreach ($tabs as $label => $name)
-                <a href="{{ route($name) }}" @class(['on' => request()->routeIs($name)])>{{ $label }}</a>
-            @endforeach
-        </nav>
+        @unless (request()->routeIs('home', 'login'))
+            <nav class="tabs" aria-label="Navigation principale">
+                @php
+                    $tabs = [
+                        'Aperçu' => 'dashboard',
+                        'Projets' => 'projects',
+                        'Tâches' => 'tasks',
+                        'Activité' => 'activity',
+                        'Équipe' => 'team',
+                    ];
+                @endphp
+                @foreach ($tabs as $label => $name)
+                    <a href="{{ route($name) }}" @class(['on' => request()->routeIs($name)])>{{ $label }}</a>
+                @endforeach
+            </nav>
+        @endunless
         <div class="aside">
             @auth
                 <div class="search">Rechercher…</div>
-                <a href="#" class="btn btn-dark btn-sm">Ajouter une tâche</a>
+                <a href="{{ route('tasks.create') }}" class="btn btn-dark btn-sm">Ajouter une tâche</a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="link" style="cursor:pointer;border:0;background:none;font:inherit">Déconnexion</button>
