@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\User;
 use App\Models\Invitation;
 use Illuminate\Http\Request;
@@ -28,6 +27,36 @@ class AuthController extends Controller
             'invitation_token' => 'nullable|string',
         ]);
 
+        $invitation = null;
+        //on vérifie d'abord si dans le formulaire d'inscription il y a un invitation_token qui a été envoyé
+        if ($request->filled('invitation_token')) {
+            $invitation = Invitation::where('token', $validated['invitation_token'])
+                ->where('statut', 'en_attente')
+                ->where('date_expiration', '>', now())
+                ->first();
+
+            // lorsque le token est fourni par le formulaire et qu'il n'y a pas d'invitation associée
+            if (!$invitation) {
+                return back()
+                    ->withInput($request->except('password', 'password_confirmation'))
+                    ->withErrors(['invitation_token' => 'L\'invitation est invalide ou a expiré.']);
+            }
+
+            // l'e-mail saisi doit être celui qui a été invité
+            if ($validated['email'] !== $invitation->email) {
+                return back()
+                    ->withInput($request->except('password', 'password_confirmation'))
+                    ->withErrors(['email' => 'Cet e-mail ne correspond pas à l\'invitation reçue.']);
+            }
+
+            // Vérification de la limite des 6 membres avant d'autoriser l'inscription
+            if ($invitation->equipe->membres()->count() >= 6) {
+                return back()
+                    ->withInput($request->except('password', 'password_confirmation'))
+                    ->withErrors(['invitation_token' => 'L\'équipe a déjà atteint sa limite de 6 membres.']);
+            }
+        }
+
         $user = User::create([
             'name' => $validated['name'],
             'first_name' => $validated['first_name'],
@@ -35,18 +64,12 @@ class AuthController extends Controller
             'password' => $validated['password'],
         ]);
 
-
-        if (!empty($validated['invitation_token'])) {
-            $invitation = Invitation::where('token', $validated['invitation_token'])
-                ->where('email', $validated['email'])
-                ->where('statut', 'en_attente')
-                ->where('date_expiration', '>', now())
-                ->first();
-
-            if ($invitation) {
-                $user->equipes()->attach($invitation->equipe_id, ['role' => 'membre']);
-                $invitation->update(['statut' => 'acceptee']);
-            }
+        //genre quand l'inivtation est valide on fait a liaison en meme temps avec l'équipe
+        if ($invitation) {
+            //on lie le user a l'équipe auquel on a invité a rejoindre
+            $user->equipes()->attach($invitation->equipe_id, ['role' => 'membre']);
+            //on change le statut de l'utilisateur 
+            $invitation->update(['statut' => 'acceptee']);
         }
 
         Auth::login($user);
