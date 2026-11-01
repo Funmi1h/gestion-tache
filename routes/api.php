@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use Api\Http\Controllers\AuthController;
+use Api\Http\Controllers\EquipeController;
+use Api\Http\Controllers\InvitationController;
 
 //les routes d'authentification
 Route::post('/register', [AuthController::class, 'register']);
@@ -44,6 +47,16 @@ Route::middleware('auth:sanctum')->group(function () {
     //voir les details et les membres d'une équipe
     Route::get('/equipes/{id}', [EquipeController::class, 'show']);    
     
+
+
+    //ici on gere les invitations 
+
+     // actions sur les invitations
+    Route::post('/invitations/accepter', [InvitationController::class, 'accepterInvitation']);
+    Route::post('/invitations/{id}/annuler', [InvitationController::class, 'annulerInvitation']);
+    
+    // Permet de forcer manuellement le nettoyage des invitations périmées
+    Route::post('/invitations/nettoyer-expirees', [InvitationController::class, 'nettoyerInvitationsExpirees']);
 });
 
 

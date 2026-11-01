@@ -46,22 +46,15 @@ class EquipeController extends Controller
         //on met le créateur de l'équipe dans la table pivot memebre_equipe et on lui donne le role d'admin
         $equipe->membres()->attach($user->id, ['role'=>'admin']);
 
+        $invitationController = new InvitationController();
 
         //on fait une bocle sur le tableau des emails pour créer et envoyer les emails
         foreach ($emailsAInviter as $email) {
-                // Génération et stockage du token unique
-                $invitation = Invitation::create([
-                    'equipe_id' => $equipe->id,
-                    'email' => $email,
-                    'inviteur_id' => $user->id,
-                    'token' => Str::random(32), // chaîne aléatoire unique de 32 caractères
-                    'statut' => 'en_attente',
-                    'date_expiration' => now()->addDays(7), 
-                ]);
+                //appelles de la fonction du controller invitation pour créer l'invitaion et les envoyer 
 
-                // Envoi de l'e-mail d'invitation intercepté par Mailpit
-                Mail::to($email)->send(new InvitationEquipe($invitation));
-            }
+                $invitationController->creerInvitation($equipe->id, $email, $user->id);
+        }
+
 
 
 

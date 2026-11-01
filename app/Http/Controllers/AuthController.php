@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
+use Api\Models\User;
+use Api\Models\Invitation;
+use Illuminate\Support\Facades\Hash;
 
 use Illuminate\Http\Request;
 
@@ -18,6 +21,34 @@ class AuthController extends Controller
             'invitation_token' => 'nullable|string', // optionnel dans le cas ou la personne s'inscrit depuis l'interface sans lien d#invitation
         ]);
 
+        $invitation = null;
+        //on vérifie d'abord si dans le formulaire d'inscription il y a un invitation_token qui a été envoyé
+        if($request->filled('invitation_token')){
+            $invitation = Invitation::where('token', $request->filled('invitation_token'))
+            ->where('email', $request->email)
+            ->where('date_expiration', '>', now())
+            ->first();
+
+            //lorsque le token est foruni par le formulaire et queil y a pas d'invitation associé 
+            if (!$invitation) {
+            return response()->json(['message' => 'L\'invitation est invalide ou a expiré.'], 422);
+            }
+            
+
+            // ca c'est une regle métier e-mail saisi doit être celui qui a été invité
+            if ($request->email !== $invitation->email) {
+                return response()->json(['message' => 'Cet e-mail ne correspond pas à l\'invitation reçue.'], 403);
+                }
+
+
+                
+            // Vérification de la limite des 6 membres avant d'autoriser l'inscription: on vérifie deja le nombre de mails envoyés mais imagine quelqu'un n'a pas de mail et contourne 
+            if ($invitation->equipe->membres()->count() >= 6) {
+                return response()->json(['message' => 'L\'équipe a déjà atteint sa limite de 6 membres.'], 422);
+            }
+            }
+    
+
         //on créer le user
         $user = User::create([
             'name' => $request->nom,
@@ -26,18 +57,11 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        //lorsque le user s'inscrit via un lien d'invitation
-        //on vérifie d'abord si dans le formulaire d'inscription il y a un invitation_token qui a été envoyé
-        if($request->filled('invitation_token')){
-            $invitation = Invitation::where('token', $request->filled('invitation_token'))
-            ->where('email', $request->email)
-            ->where('date_expiration', '>', now())
-            ->first();
-        }
 
+        //genre quand l'inivtation est valide on fait a liaison en meme temps avec l'équipe
         if($invitation){
             //on lie le user a l'équipe auquel on a invité a rejoindre
-            $user->equipes()->attach($invitation->equipe_id, ['role'=>'memebre']);
+            $user->equipes()->attach($invitation->equipe_id, ['role'=>'membre']);
             //on change le statut de l'utilisateur 
             $invitation->update(['statut'=> 'acceptee']);
         }
