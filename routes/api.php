@@ -3,9 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use Api\Http\Controllers\AuthController;
-use Api\Http\Controllers\EquipeController;
-use Api\Http\Controllers\InvitationController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EquipeController;
+use App\Http\Controllers\InvitationController;
 
 //les routes d'authentification
 Route::post('/register', [AuthController::class, 'register']);

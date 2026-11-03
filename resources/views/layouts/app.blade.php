@@ -24,7 +24,7 @@
             <span class="logo"></span>
             Taskflow
         </a>
-<<<<<<< HEAD
+
 
         <nav class="nav-tabs" aria-label="Navigation principale">
             @php
@@ -48,29 +48,7 @@
                     {{ auth()->user()->first_name ?? auth()->user()->name }}
                 </span>
                 <form method="POST" action="{{ route('logout') }}" class="logout-form">
-=======
-        @unless (request()->routeIs('home', 'login'))
-            <nav class="tabs" aria-label="Navigation principale">
-                @php
-                    $tabs = [
-                        'Aperçu' => 'dashboard',
-                        'Projets' => 'projects',
-                        'Tâches' => 'tasks',
-                        'Activité' => 'activity',
-                        'Équipe' => 'team',
-                    ];
-                @endphp
-                @foreach ($tabs as $label => $name)
-                    <a href="{{ route($name) }}" @class(['on' => request()->routeIs($name)])>{{ $label }}</a>
-                @endforeach
-            </nav>
-        @endunless
-        <div class="aside">
-            @auth
-                <div class="search">Rechercher…</div>
-                <a href="{{ route('tasks.create') }}" class="btn btn-dark btn-sm">Ajouter une tâche</a>
-                <form method="POST" action="{{ route('logout') }}">
->>>>>>> origin/primael
+
                     @csrf
                     <button type="submit" class="btn-logout">Déconnexion</button>
                 </form>
@@ -97,9 +75,29 @@
             </div>
         @endif
 
+        @if (session('status'))
+            <div class="alert alert-success">
+                {{ session('status') }}
+            </div>
+        @endif
+
         @if (session('error'))
             <div class="alert alert-error">
                 {{ session('error') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="alert alert-error">
+                @if ($errors->count() === 1)
+                    {{ $errors->first() }}
+                @else
+                    <ul style="margin: 0; padding-left: 20px;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
         @endif
 

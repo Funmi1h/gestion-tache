@@ -9,7 +9,7 @@
         En créant cette équipe, vous en devenez l'administrateur. Vous pouvez dès à présent inviter jusqu'à 5 collaborateurs.
     </p>
 
-    <form method="POST" action="{{ route('equipes.store') }}">
+    <form method="POST" action="{{ route('equipes.store') }}" novalidate>
         @csrf
 
         <div class="form-group">

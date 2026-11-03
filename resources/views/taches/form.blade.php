@@ -5,15 +5,12 @@
 @section('heading', $isEditing ? 'Modifier la tâche' : 'Nouvelle tâche')
 
 @section('content')
-    <div class="chart" style="max-width:680px">
+    <div class="chart task-form-card">
         @if (! $isEditing && $equipes->isEmpty())
             <p class="alert">Tu dois d’abord rejoindre une équipe pour créer une tâche.</p>
         @endif
-        @if ($errors->any())
-            <div class="alert">{{ $errors->first() }}</div>
-        @endif
 
-        <form method="POST" action="{{ $isEditing ? route('tasks.update', $tache) : route('tasks.store') }}">
+        <form method="POST" action="{{ $isEditing ? route('tasks.update', $tache) : route('tasks.store') }}" novalidate>
             @csrf
             @if ($isEditing)
                 @method('PATCH')
@@ -52,7 +49,7 @@
             </div>
             <div class="actions">
                 <button class="btn btn-dark" type="submit" @disabled(! $isEditing && $equipes->isEmpty())>{{ $isEditing ? 'Enregistrer' : 'Créer la tâche' }}</button>
-                <a class="btn" href="{{ $isEditing ? route('tasks.show', $tache) : route('tasks') }}">Annuler</a>
+                <a class="btn" href="{{ route('tasks', ['equipe_id' => $tache->equipe_id ?? null]) }}">Annuler</a>
             </div>
         </form>
     </div>

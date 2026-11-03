@@ -26,6 +26,17 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'invitation_token' => 'nullable|string',
+        ], [
+            'name.required' => 'Le nom de famille est obligatoire.',
+            'name.max' => 'Le nom ne peut pas dépasser 255 caractères.',
+            'first_name.required' => 'Le prénom est obligatoire.',
+            'first_name.max' => 'Le prénom ne peut pas dépasser 255 caractères.',
+            'email.required' => 'L\'adresse e-mail est obligatoire.',
+            'email.email' => 'Veuillez renseigner une adresse e-mail valide.',
+            'email.unique' => 'Cette adresse e-mail est déjà associée à un compte.',
+            'password.required' => 'Le mot de passe est obligatoire.',
+            'password.min' => 'Le mot de passe doit comporter au moins 8 caractères.',
+            'password.confirmed' => 'Les deux mots de passe ne correspondent pas.',
         ]);
 
         $invitation = null;
@@ -76,6 +87,11 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
+        //si le user vient d'une invitation
+        if ($request->filled('invitation_token')) {
+            return redirect()->to('/invitations/accepter/' . $request->input('invitation_token'));
+        }
+
         return redirect()
             ->route('dashboard')
             ->with('status', 'Compte créé avec succès. Bienvenue sur Taskflow !');
@@ -91,6 +107,10 @@ class AuthController extends Controller
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
+        ], [
+            'email.required' => 'Veuillez saisir votre adresse e-mail.',
+            'email.email' => 'Veuillez saisir une adresse e-mail valide.',
+            'password.required' => 'Veuillez saisir votre mot de passe.',
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {

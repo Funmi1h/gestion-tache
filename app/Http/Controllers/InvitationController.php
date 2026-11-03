@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\InvitationEquipe;
+use App\Models\Equipe;
+use App\Models\Invitation;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 class InvitationController extends Controller
 {
     //crrer une invitation et envoyer le lien 
@@ -93,4 +97,45 @@ class InvitationController extends Controller
         ]);
     }
 
+
+
+       
+     //Valide l'invitation et intègre l'utilisateur connecté dans l'équipe (CDC §5.1 & §3.2)
+     
+    public function accepterInvitation($token, Request $request)
+    {
+        // récupération de l'invitation valide
+        $invitation = Invitation::with('equipe')
+            ->where('token', $token)
+            ->where('statut', 'en_attente')
+            ->where('date_expiration', '>', now())
+            ->firstOrFail();
+
+        $user = $request->user();
+
+        // Sécurité : L'utilisateur connecté doit posséder l'adresse e-mail invitée
+        if ($user->email !== $invitation->email) {
+            return redirect()->route('invitations.rejoindre', $token)
+                ->with('error', 'Cette invitation est réservée à l\'adresse ' . $invitation->email . '.');
+        }
+
+        // vérifier que l'équipe n'a pas atteint la limite de 6 membres
+        if ($invitation->equipe->membres()->count() >= 6) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Désolé, cette équipe a déjà atteint la limite maximale de 6 membres.');
+        }
+
+        // ajouter l'utilisateur à l'équipe avec le rôle "membre"
+        // syncWithoutDetaching évite les doublons si l'utilisateur en faisait déjà partie
+        $invitation->equipe->membres()->syncWithoutDetaching([
+            $user->id => ['role' => 'membre']
+        ]);
+
+        // marquer l'invitation comme acceptée
+        $invitation->update(['statut' => 'acceptee']);
+
+        // rediriger vers la page de l'équipe avec confirmation
+        return redirect()->route('dashboard', $invitation->equipe_id)
+            ->with('success', 'Félicitations ! Vous avez rejoint l\'équipe ' . $invitation->equipe->nom . ' avec succès.');
+    }
 }

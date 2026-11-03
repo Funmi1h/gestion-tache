@@ -6,22 +6,22 @@
     <style>
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: #f8fafc;
+            background-color: #fbf7f9;
             margin: 0;
             padding: 30px 15px;
-            color: #0f172a;
+            color: #1e1318;
         }
         .email-wrapper {
             max-width: 540px;
             margin: 0 auto;
             background: #ffffff;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #eed8e2;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 12px rgba(80, 42, 59, 0.06);
         }
         .email-header {
-            background-color: #2563eb;
+            background-color: #C83F74;
             padding: 24px;
             text-align: center;
         }
@@ -30,6 +30,7 @@
             margin: 0;
             font-size: 22px;
             font-weight: 600;
+            letter-spacing: -0.3px;
         }
         .email-body {
             padding: 32px 28px;
@@ -40,7 +41,7 @@
             display: block;
             width: fit-content;
             margin: 28px auto;
-            background-color: #2563eb;
+            background-color: #C83F74;
             color: #ffffff !important;
             text-decoration: none;
             padding: 12px 28px;
@@ -48,20 +49,22 @@
             font-weight: 600;
             font-size: 14px;
             text-align: center;
+            box-shadow: 0 2px 6px rgba(200, 63, 116, 0.25);
         }
         .info-box {
-            background: #f1f5f9;
+            background: #F9EDF2;
+            border: 1px solid #EED8E2;
             border-radius: 8px;
             padding: 12px 16px;
             font-size: 13px;
-            color: #475569;
-            margin-top: 20px;
+            color: #7A284A;
+            margin-top: 24px;
         }
         .email-footer {
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #eed8e2;
             padding: 16px;
             font-size: 12px;
-            color: #64748b;
+            color: #8c717c;
             text-align: center;
         }
     </style>
@@ -81,7 +84,7 @@
             </p>
 
             @if(!empty($invitation->equipe->description))
-                <p style="font-style: italic; color: #475569; border-left: 3px solid #2563eb; padding-left: 12px; margin: 16px 0;">
+                <p style="font-style: italic; color: #5a3d4a; border-left: 3px solid #C83F74; padding-left: 12px; margin: 16px 0;">
                     « {{ $invitation->equipe->description }} »
                 </p>
             @endif

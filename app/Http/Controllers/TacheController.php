@@ -13,21 +13,10 @@ class TacheController extends Controller
 {
     public function index(Request $request): View
     {
-        // a retirer plus tard,c'est pour avoir un apercu de la page quand on est pas conecté
-        if (! $request->user()) {
-            return view('tasks', [
-                'equipes' => collect(),
-                'equipeId' => null,
-                'membres' => collect(),
-                'taches' => collect(),
-                'apercu' => true,
-            ]);
-        }
-
         // on cherche les equipes dont l'utilisateur connecté est membre pour savoir quelles taches afficher
-        $userId = $request->user()->id;
-        $equipeIds = MembreEquipe::where('user_id', $userId)->pluck('equipe_id');
-        $equipes = Equipe::whereIn('id', $equipeIds)->orderBy('nom')->get();
+        $userId = $request->user()?->id;
+        $equipeIds = $userId ? MembreEquipe::where('user_id', $userId)->pluck('equipe_id') : collect();
+        $equipes = $equipeIds->isNotEmpty() ? Equipe::whereIn('id', $equipeIds)->orderBy('nom')->get() : collect();
         $filters = $request->validate([
             'equipe_id' => ['nullable', 'integer'],
             'statut' => ['nullable', 'in:A_FAIRE,EN_COURS,TERMINEE'],
@@ -59,7 +48,7 @@ class TacheController extends Controller
             $taches = $query->latest()->get();
         }
 
-        return view('tasks', compact('equipes', 'equipeId', 'membres', 'taches') + ['apercu' => false]);
+        return view('taches.index', compact('equipes', 'equipeId', 'membres', 'taches'));
     }
 
     public function create(Request $request): View
@@ -68,7 +57,7 @@ class TacheController extends Controller
         $equipes = Equipe::whereIn('id', $equipeIds)->orderBy('nom')->get();
         $membres = MembreEquipe::with(['equipe', 'utilisateur'])->whereIn('equipe_id', $equipeIds)->get();
 
-        return view('tasks.form', compact('equipes', 'membres'));
+        return view('taches.form', compact('equipes', 'membres'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -79,6 +68,14 @@ class TacheController extends Controller
             'titre' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'date_echeance' => ['nullable', 'date'],
+        ], [
+            'equipe_id.required' => 'Veuillez sélectionner une équipe.',
+            'equipe_id.exists' => 'L\'équipe sélectionnée n\'existe pas.',
+            'membre_equipe_id.required' => 'Veuillez désigner un responsable pour cette tâche.',
+            'membre_equipe_id.exists' => 'Le responsable sélectionné n\'est pas valide.',
+            'titre.required' => 'Le titre de la tâche est obligatoire.',
+            'titre.max' => 'Le titre ne peut pas dépasser 255 caractères.',
+            'date_echeance.date' => 'La date d\'échéance doit être une date valide.',
         ]);
         $this->ensureUserInTeam($request, $data['equipe_id']);
         $this->ensureAssigneeInTeam($data['membre_equipe_id'], $data['equipe_id']);
@@ -88,7 +85,8 @@ class TacheController extends Controller
             'statut' => 'A_FAIRE',
         ]);
 
-        return redirect()->route('tasks.show', $tache)->with('status', 'Tâche créée.');
+        // redirection directement vers le kanban de l'equipe
+        return redirect()->route('tasks', ['equipe_id' => $tache->equipe_id])->with('status', 'Tâche créée avec succès.');
     }
 
     public function show(Request $request, Tache $tache): View
@@ -98,7 +96,7 @@ class TacheController extends Controller
         $canManage = (int) $tache->createur_id === (int) $request->user()->id || $membre->role === 'admin';
         $isResponsable = (int) $tache->responsable->user_id === (int) $request->user()->id;
 
-        return view('tasks.show', compact('tache', 'canManage', 'isResponsable'));
+        return view('taches.show', compact('tache', 'canManage', 'isResponsable'));
     }
 
     public function edit(Request $request, Tache $tache): View
@@ -106,7 +104,7 @@ class TacheController extends Controller
         $this->ensureCanManage($request, $tache);
         $membres = MembreEquipe::with('utilisateur')->where('equipe_id', $tache->equipe_id)->get();
 
-        return view('tasks.form', compact('tache', 'membres'));
+        return view('taches.form', compact('tache', 'membres'));
     }
 
     public function update(Request $request, Tache $tache): RedirectResponse
@@ -117,19 +115,28 @@ class TacheController extends Controller
             'titre' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'date_echeance' => ['nullable', 'date'],
+        ], [
+            'membre_equipe_id.required' => 'Veuillez désigner un responsable pour cette tâche.',
+            'membre_equipe_id.exists' => 'Le responsable sélectionné n\'est pas valide.',
+            'titre.required' => 'Le titre de la tâche est obligatoire.',
+            'titre.max' => 'Le titre ne peut pas dépasser 255 caractères.',
+            'date_echeance.date' => 'La date d\'échéance doit être une date valide.',
         ]);
         $this->ensureAssigneeInTeam($data['membre_equipe_id'], $tache->equipe_id);
         $tache->update($data);
 
-        return redirect()->route('tasks.show', $tache)->with('status', 'Tâche modifiée.');
+        // retour direct au kanban avec message de succes (comme a la creation)
+        return redirect()->route('tasks', ['equipe_id' => $tache->equipe_id])->with('status', 'Tâche modifiée avec succès.');
     }
 
     public function destroy(Request $request, Tache $tache): RedirectResponse
     {
         $this->ensureCanManage($request, $tache);
+        $equipeId = $tache->equipe_id;
         $tache->delete();
 
-        return redirect()->route('tasks')->with('status', 'Tâche supprimée.');
+        // retour direct au kanban
+        return redirect()->route('tasks', ['equipe_id' => $equipeId])->with('status', 'Tâche supprimée avec succès.');
     }
 
     public function updateStatut(Request $request, Tache $tache): RedirectResponse
@@ -140,7 +147,12 @@ class TacheController extends Controller
                 ->exists(),
             403
         );
-        $data = $request->validate(['statut' => ['required', 'in:A_FAIRE,EN_COURS,TERMINEE']]);
+        $data = $request->validate([
+            'statut' => ['required', 'in:A_FAIRE,EN_COURS,TERMINEE'],
+        ], [
+            'statut.required' => 'Veuillez sélectionner un statut.',
+            'statut.in' => 'Le statut sélectionné n\'est pas valide.',
+        ]);
         $tache->update($data);
 
         return back()->with('status', 'Statut mis à jour.');

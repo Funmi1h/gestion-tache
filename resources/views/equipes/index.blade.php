@@ -8,7 +8,7 @@
 @section('heading', 'Mes Équipes')
 
 @section('actions')
-    <a href="{{ route('equipes.create') }}" class="btn btn-dark" style="background:var(--primary, #2563EB); color:#fff; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:500;">
+    <a href="{{ route('equipes.create') }}" class="btn btn-dark" style="background:var(--primary, #C83F74); color:#fff; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:500;">
         + Nouvelle équipe
     </a>
 @endsection
@@ -42,7 +42,7 @@
                 <span style="color:var(--text-muted);">
                     👥 {{ $equipe->membres_count ?? $equipe->membres->count() }} / 6 membre(s)
                 </span>
-                <a href="{{ route('equipes.show', $equipe->id) }}" style="color:var(--primary, #2563eb); font-weight:500; text-decoration:none;">
+                <a href="{{ route('equipes.show', $equipe->id) }}" style="color:var(--primary, #C83F74); font-weight:500; text-decoration:none;">
                     Gérer &rarr;
                 </a>
             </div>
@@ -50,7 +50,7 @@
     @empty
         <div style="grid-column: 1 / -1; text-align:center; padding:48px 0; background:#fff; border:1px dashed var(--line); border-radius:12px;">
             <p style="color:var(--muted); margin-bottom:16px;">Vous n'appartenez à aucune équipe pour le moment.</p>
-            <a href="{{ route('equipes.create') }}" class="btn" style="background:var(--primary, #2563EB); color:#fff; padding:8px 16px; border-radius:8px; text-decoration:none;">
+            <a href="{{ route('equipes.create') }}" class="btn" style="background:var(--primary, #C83F74); color:#fff; padding:8px 16px; border-radius:8px; text-decoration:none;">
                 Créer ma première équipe
             </a>
         </div>

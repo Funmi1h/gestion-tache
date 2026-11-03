@@ -1,93 +1,105 @@
 <?php
 
 namespace App\Http\Controllers;
-use Api\Models\Equipe;
-use App\Mail\InvitationEquipe;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+
+use App\Models\Equipe; 
+use App\Models\Invitation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EquipeController extends Controller
 {
-    //
-    //fonction pour créer une équipe: on a besoin du nom de l'équipe, dÄ'une description et de l'id de la personne qui crée
-    //cette fonction va permettre aussi d'envoyer les invitations aux mails entreer dans le formulaire d création d'équipe
+    // pour lister les équipes de l'utilisateur connecté 
+    public function index(Request $request)
+    {
+        $equipes = $request->user()->equipes()->with('membres')->get();
+
+        if ($request->expectsJson()) {
+            return response()->json($equipes);
+        }
+
+        return view('equipes.index', compact('equipes'));
+    }
+
+        //afficher le formulaire de création 
+    public function create()
+    {
+        return view('equipes.create');
+    }
+
+    // enregistrer les equipes et envoyer les invitations 
     public function store(Request $request)
     {
-        $request->validate([
-            'nom'=> 'required|string|max:255',
-            'description'=>'nullable|string',
-            'emails'=>'nullable|array',
-            'emails.*'=>'required|email'//le * c'est pour dire chaque elément du tableau
+        $validated = $request->validate([
+            'nom'         => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'emails'      => 'nullable|array',
+            'emails.*'    => 'nullable|email',
+        ], [
+            'nom.required'   => 'Le nom de l\'équipe est obligatoire.',
+            'nom.max'        => 'Le nom de l\'équipe ne peut pas dépasser 255 caractères.',
+            'emails.*.email' => 'Veuillez renseigner une adresse e-mail valide pour chaque invité.',
         ]);
 
-        //on recupere le user connecté parce que on aura besoin de son id 
-        $user = $request->user;
+        $user = $request->user();
 
-        // le tableau d'e-mails à inviter (s'il est vide, on prend un tableau vide par défaut)
-        $emailsAInviter = $request->input('emails', []);
-        // ca la c'est la regle métier qu'on avait definit Le créateur (1) + le nombre d'invités ne doit pas dépasser 6 au total
+        // pour filtrer les emails non vides
+        $emailsAInviter = array_filter($validated['emails'] ?? []);
+
+        //le créateur  + invitations ne doit pas dépasser 6 au total
         if (count($emailsAInviter) + 1 > 6) {
-            return response()->json([
-                'message' => 'Une équipe ne peut pas dépasser 6 membres, invitations en attente incluses.'
-            ], 422);
+            return back()
+                ->withInput()
+                ->withErrors(['emails' => 'Une équipe ne peut pas dépasser 6 membres, invitations incluses.']);
         }
 
-        //utilisation d'une transaction pour que la création d'une équipe soit égal a la liaison automatique du user qi cré a l'équipe et la definition de son role
-        //la creation d'une equipe soit égale aussi a l'envoi des mails d'invitation
-        $equipe = DB::transaction (function() use ($request, $user){
-        //on créer d'une nouvelle ligne dans equipes
-        $equipe = Equipe::create([
-            'nom' =>request->nom,
-            'description' => $request->description,
-            'createur_id'=> $user->id,
-        ]);
+        // on fait une transaction DB : Création équipe + Attachement ADMIN + Invitations
+        $equipe = DB::transaction(function () use ($validated, $user, $emailsAInviter) {
+            // Création de l'équipe
+            $equipe = Equipe::create([
+                'nom'         => $validated['nom'],
+                'description' => $validated['description'] ?? null,
+                'createur_id' => $user->id,
+            ]);
 
-        //on met le créateur de l'équipe dans la table pivot memebre_equipe et on lui donne le role d'admin
-        $equipe->membres()->attach($user->id, ['role'=>'admin']);
+            // créateur devient ADMIN automatiquement (
+            $equipe->membres()->attach($user->id, ['role' => 'admin']);
 
-        $invitationController = new InvitationController();
-
-        //on fait une bocle sur le tableau des emails pour créer et envoyer les emails
-        foreach ($emailsAInviter as $email) {
-                //appelles de la fonction du controller invitation pour créer l'invitaion et les envoyer 
-
+            // Envoi des invitations
+            $invitationController = new InvitationController();
+            foreach ($emailsAInviter as $email) {
                 $invitationController->creerInvitation($equipe->id, $email, $user->id);
-        }
+            }
 
-
-
-
-        return $equipe;
-        
+            return $equipe;
         });
 
-        
-        return response()->json([
-            'message' => 'Équipe créée avec succès et vous en êtes l’ADMIN.',
-            'equipe' => $equipe->load('membres', 'invitations') // on charge la liste des membres pour la réponse
-        ], 201);
-
-        
-    }
-
-    //consulter la liste de ses equipes
-    public function index(Request $request){
-        $equipes = $request->user()->equipes()->with('membres')->get();
-    }
-
-    //consulter une equipe précise et ses membres
-    
-    public function show($id, Request $request){
-        $equipe = Equipe::with('membres')->findOrFail($id);
-
-        //pr  mesure de sécurité on vérifie si la personne connectée ne  fait pas partie de l'équipe
-        if(!$equipe->membres->contains($request->user()->id)){
+        if ($request->expectsJson()) {
             return response()->json([
-                'message'=> 'Accès non autorisé à cette équipe.'
-            ], 403);
+                'message' => 'Équipe créée avec succès.',
+                'equipe' => $equipe->load('membres', 'invitations')
+            ], 201);
         }
 
-        return response()->json($equipe);
+        return redirect()
+            ->route('equipes.show', $equipe->id)
+            ->with('success', 'Équipe créée avec succès !');
+    }
+
+    // consulter une équipe précise et ses membres 
+    public function show($id, Request $request)
+    {
+        $equipe = Equipe::with(['membres', 'invitations'])->findOrFail($id);
+
+        // vérifier que la personne connectée fait bien partie de l'équipe
+        if (!$equipe->membres->contains('id', $request->user()->id)) {
+            abort(403, 'Accès non autorisé à cette équipe.');
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json($equipe);
+        }
+
+        return view('equipes.show', compact('equipe'));
     }
 }

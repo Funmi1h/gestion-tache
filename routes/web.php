@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TacheController;
+use App\Http\Controllers\EquipeController;
+use App\Http\Controllers\InvitationController;
 use App\Models\Invitation;
 use Illuminate\Support\Facades\Route;
 
@@ -35,14 +38,21 @@ Route::middleware('guest')->group(function () {
 
 //les pages auquel l'aaces est restreint a une authentification
 Route::middleware('auth')->group(function () {
+
+    Route::post('/invitations/accepter/{token}', [InvitationController::class, 'accepterInvitation'])->name('invitations.valider');
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::view('/dashboard', 'dashboard.index')->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::view('/equipes/creer', 'equipes.create')->name('equipes.create');
-    Route::view('/equipes', 'equipes.index')->name('equipes.index');
+    
 
+    //crud pour les équipes 
+    Route::get('/equipes', [EquipeController::class, 'index'])->name('equipes.index');
+    Route::get('/equipes/creer', [EquipeController::class, 'create'])->name('equipes.create');
+    Route::post('/equipes', [EquipeController::class, 'store'])->name('equipes.store');
+    Route::get('/equipes/{equipe}', [EquipeController::class, 'show'])->name('equipes.show');
+    
     //crud des taches 
     Route::get('/taches', [TacheController::class, 'index'])->name('tasks');
     Route::get('/taches/creer', [TacheController::class, 'create'])->name('tasks.create');

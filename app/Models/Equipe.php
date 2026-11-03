@@ -24,7 +24,7 @@ class Equipe extends Model
     public function membres(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'membre_equipe', 'equipe_id', 'user_id')
-                    ->withPivot('role') // permet d'accéder à la colonne "role" de la table intermédiaire
+                    ->withPivot('id', 'role') // permet d'accéder à "id" et "role" de la table intermédiaire
                     ->withTimestamps();
     }
 
@@ -32,5 +32,11 @@ class Equipe extends Model
     public function invitations(): HasMany
     {
         return $this->hasMany(Invitation::class, 'equipe_id');
+    }
+
+    //une equipe a plusieurs taches
+    public function taches(): HasMany
+    {
+        return $this->hasMany(Tache::class, 'equipe_id');
     }
 }

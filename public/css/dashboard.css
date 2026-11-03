@@ -1,47 +1,106 @@
 .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 16px;
-    margin-bottom: 28px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
 }
 
 .kpi-card {
-    background: var(--bg-card, #fff);
-    border: 1px solid var(--line, #e2e8f0);
-    border-radius: 12px;
-    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 94px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    text-decoration: none;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
 }
 
-.kpi-label {
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(80, 42, 59, 0.08);
+}
+
+.kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 6px;
+}
+
+.kpi-title {
     font-size: 13px;
-    color: var(--text-muted, #64748b);
-    margin-bottom: 6px;
-}
-
-.kpi-value {
-    font-size: 28px;
     font-weight: 600;
-    color: var(--text-main, #0f172a);
 }
 
-.kpi-card.doing { color: #b45309; }
-.kpi-card.doing .kpi-value { color: #b45309; }
-
-.kpi-card.done { color: #15803d; }
-.kpi-card.done .kpi-value { color: #15803d; }
-
-.kpi-card.late {
-    background: #fef2f2;
-    border-color: #fca5a5;
-    color: #dc2626;
+.kpi-count {
+    font-size: 13px;
+    font-weight: 600;
 }
-.kpi-card.late .kpi-value { color: #dc2626; }
+
+.kpi-subtext {
+    font-size: 12px;
+    text-align: center;
+    margin: 10px 0 4px;
+    opacity: 0.75;
+}
+
+/* style thematique comme le kanban */
+.kpi-total {
+    background: #F9EDF2;
+    border-color: #EED8E2;
+    color: #C83F74;
+}
+.kpi-total .kpi-header {
+    border-color: #EED8E2;
+}
+
+.kpi-todo {
+    background: #F5EFF2;
+    border-color: #E7DDE2;
+    color: #957D88;
+}
+.kpi-todo .kpi-header {
+    border-color: #E7DDE2;
+}
+
+.kpi-cours {
+    background: #FCECF2;
+    border-color: #F0D5E0;
+    color: #C6537F;
+}
+.kpi-cours .kpi-header {
+    border-color: #F0D5E0;
+}
+
+.kpi-fini {
+    background: #F0F3EF;
+    border-color: #DCE7DE;
+    color: #587B65;
+}
+.kpi-fini .kpi-header {
+    border-color: #DCE7DE;
+}
+
+.kpi-late {
+    background: #F9E8ED;
+    border-color: #EBCBD6;
+    color: #963653;
+}
+.kpi-late .kpi-header {
+    border-color: #EBCBD6;
+}
 
 /* Répartition par membre */
 .progress-track {
     width: 100%;
     height: 8px;
-    background: #f1f5f9;
+    background: #F2E9ED;
     border-radius: 4px;
     overflow: hidden;
     margin-top: 6px;
@@ -49,6 +108,6 @@
 
 .progress-fill {
     height: 100%;
-    background: var(--primary, #2563eb);
+    background: var(--primary, #c83f74);
     border-radius: 4px;
 }

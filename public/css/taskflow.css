@@ -1,39 +1,45 @@
 :root {
     /* Nuances de base */
-    --bg-page: #F8FAFC;        /* Fond de page très doux (Slate 50) */
+    --bg-page: #FBF6F8;
     --bg-card: #FFFFFF;        /* Fond des conteneurs et cartes */
-    --line: #E2E8F0;           /* Bordures subtiles (Slate 200) */
-    --text-main: #0F172A;      /* Texte principal très lisible (Slate 900) */
-    --text-muted: #64748B;     /* Texte secondaire / libellés (Slate 500) */
+    --line: #EAD6DF;
+    --text-main: #34252D;
+    --text-muted: #846E79;
 
-    /* Couleur d'action (Branding) */
-    --primary: #2563EB;        /* Bleu moderne (Blue 600) */
-    --primary-hover: #1D4ED8;  /* Survol bouton (Blue 700) */
-    --primary-subtle: #EFF6FF; /* Arrière-plan sélection (Blue 50) */
+    --primary: #C83F74;
+    --primary-hover: #A92F60;
+    --primary-subtle: #F9E6EE;
 
-    /* Couleurs sémantiques des statuts (CDC §6.2 & §7) */
-    --status-todo-bg: #F1F5F9;
-    --status-todo-txt: #475569;   /* À faire */
+    --status-todo-bg: #F2E9ED;
+    --status-todo-txt: #63515A;
 
-    --status-doing-bg: #FEF3C7;
-    --status-doing-txt: #92400E;  /* En cours */
+    --status-doing-bg: #FFF0D7;
+    --status-doing-txt: #85551B;
 
-    --status-done-bg: #DCFCE7;
-    --status-done-txt: #166534;   /* Terminée */
+    --status-done-bg: #E6F3EB;
+    --status-done-txt: #246744;
 
-    --status-late-bg: #FEE2E2;
-    --status-late-txt: #991B1B;   /* En retard */
+    --status-late-bg: #FBE5EA;
+    --status-late-txt: #963653;
 
-    /* Rôles (CDC §4) */
-    --role-admin-bg: #EDE9FE;
-    --role-admin-txt: #5B21B6;    /* ADMIN */
-    --role-member-bg: #E0F2FE;
-    --role-member-txt: #075985;   /* MEMBRE */
+    --role-admin-bg: #F5DCE6;
+    --role-admin-txt: #8D2E52;
+    --role-member-bg: #EAE1E6;
+    --role-member-txt: #63505A;
+
+    --bg: var(--bg-page);
+    --card: var(--bg-card);
+    --text: var(--text-main);
+    --muted: var(--text-muted);
+    --blue: var(--primary);
+    --ink: var(--text-main);
 }
 
-
-
-
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
 
 body {
     background: var(--bg-page, #F8FAFC);
@@ -47,7 +53,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: #fff;
+    background: var(--bg-page);
 }
 
 body.authpage {
@@ -85,6 +91,7 @@ body.authpage .shell {
     display: grid;
     place-items: center;
     padding: 48px 32px;
+    background: var(--bg-page);
 }
 
 .authpage .btn-sm {
@@ -116,7 +123,7 @@ body.authpage .shell {
     width: 26px;
     height: 26px;
     border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #93C5FD, var(--primary, #2563EB));
+    background: radial-gradient(circle at 30% 30%, #F7C8D9, var(--primary, #C83F74));
     flex-shrink: 0;
 }
 
@@ -143,8 +150,8 @@ body.authpage .shell {
 }
 
 .nav-link.active {
-    color: var(--primary, #2563EB);
-    border-color: var(--primary, #2563EB);
+    color: var(--primary, #C83F74);
+    border-color: var(--primary, #C83F74);
 }
 
 .user-actions {
@@ -177,8 +184,8 @@ body.authpage .shell {
 }
 
 .btn-logout:hover {
-    background: #F1F5F9;
-    color: #DC2626;
+    background: var(--primary-subtle);
+    color: var(--status-late-txt);
 }
 
 .btn-link {
@@ -196,6 +203,58 @@ body.authpage .shell {
     width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
+}
+
+.chart form {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.task-form-card {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 36px);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg-card);
+}
+
+.chart .field {
+    margin-bottom: 20px;
+}
+
+.chart .field label {
+    display: block;
+    margin-bottom: 7px;
+    font-weight: 500;
+}
+
+.chart .field input,
+.chart .field textarea,
+.chart .field select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 11px 12px;
+    border: 1px solid var(--line, #E2E8F0);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--text-main, #0F172A);
+    font: inherit;
+}
+
+.chart .field textarea {
+    min-height: 132px;
+    resize: vertical;
+}
+
+.chart form .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
 }
 
 .page-heading {
@@ -223,13 +282,13 @@ body.authpage .shell {
 .alert-success {
     background: var(--status-done-bg, #DCFCE7);
     color: var(--status-done-txt, #166534);
-    border: 1px solid #BBF7D0;
+    border: 1px solid #C5E4D1;
 }
 
 .alert-error {
     background: var(--status-late-bg, #FEE2E2);
     color: var(--status-late-txt, #991B1B);
-    border: 1px solid #FECACA;
+    border: 1px solid #EAC4D0;
 }
 
 @media (max-width: 600px) {
@@ -239,6 +298,58 @@ body.authpage .shell {
 
     .authpage .form-side {
         padding: 32px 20px;
+    }
+}
+
+@media (max-width: 720px) {
+    .top-nav {
+        min-height: 64px;
+        height: auto;
+        padding: 12px 16px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .nav-tabs {
+        order: 3;
+        flex: 1 0 100%;
+        min-height: 40px;
+        gap: 18px;
+        overflow-x: auto;
+    }
+
+    .user-actions {
+        gap: 10px;
+    }
+
+    .main-content {
+        padding: 24px 18px;
+    }
+
+    .page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: 20px 14px;
+    }
+
+    .chart {
+        padding: 20px 16px;
+    }
+
+    .chart form .actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .chart form .actions > * {
+        width: 100%;
+        text-align: center;
     }
 }
 
@@ -262,7 +373,7 @@ body.authpage .shell {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     background: var(--primary-subtle, #EFF6FF);
-    color: var(--primary, #2563EB);
+    color: var(--primary, #C83F74);
     padding: 6px 14px;
     border-radius: 20px;
     margin-bottom: 20px;
@@ -291,7 +402,7 @@ body.authpage .shell {
 }
 
 .btn-primary {
-    background: var(--primary, #2563EB);
+    background: var(--primary, #C83F74);
     color: #fff;
     padding: 12px 24px;
     border-radius: 8px;
@@ -304,7 +415,7 @@ body.authpage .shell {
 }
 
 .btn-primary:hover {
-    background: var(--primary-hover, #1D4ED8);
+    background: var(--primary-hover, #A92F60);
 }
 
 .btn-outline {
@@ -320,5 +431,5 @@ body.authpage .shell {
 }
 
 .btn-outline:hover {
-    background: #F8FAFC;
+    background: var(--bg-page);
 }
