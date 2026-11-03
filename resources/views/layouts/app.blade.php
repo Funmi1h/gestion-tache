@@ -24,6 +24,7 @@
             <span class="logo"></span>
             Taskflow
         </a>
+<<<<<<< HEAD
 
         <nav class="nav-tabs" aria-label="Navigation principale">
             @php
@@ -47,6 +48,29 @@
                     {{ auth()->user()->first_name ?? auth()->user()->name }}
                 </span>
                 <form method="POST" action="{{ route('logout') }}" class="logout-form">
+=======
+        @unless (request()->routeIs('home', 'login'))
+            <nav class="tabs" aria-label="Navigation principale">
+                @php
+                    $tabs = [
+                        'Aperçu' => 'dashboard',
+                        'Projets' => 'projects',
+                        'Tâches' => 'tasks',
+                        'Activité' => 'activity',
+                        'Équipe' => 'team',
+                    ];
+                @endphp
+                @foreach ($tabs as $label => $name)
+                    <a href="{{ route($name) }}" @class(['on' => request()->routeIs($name)])>{{ $label }}</a>
+                @endforeach
+            </nav>
+        @endunless
+        <div class="aside">
+            @auth
+                <div class="search">Rechercher…</div>
+                <a href="{{ route('tasks.create') }}" class="btn btn-dark btn-sm">Ajouter une tâche</a>
+                <form method="POST" action="{{ route('logout') }}">
+>>>>>>> origin/primael
                     @csrf
                     <button type="submit" class="btn-logout">Déconnexion</button>
                 </form>
