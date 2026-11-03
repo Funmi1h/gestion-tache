@@ -79,24 +79,9 @@
                     </a>
                 </form>
 
-                <details class="new-task">
-                    <summary class="btn btn-dark btn-sm">Nouvelle tâche</summary>
-                    <form class="task-form" method="POST" action="{{ route('tasks.store') }}" novalidate>
-                        @csrf
-                        <input type="hidden" name="equipe_id" value="{{ $equipeId }}">
-                        <label class="task-form__field task-form__field--wide">Titre<input name="titre" required maxlength="255"></label>
-                        <label class="task-form__field task-form__field--wide">Description<input name="description" placeholder="Description courte"></label>
-                        <label class="task-form__field">Responsable
-                            <select name="membre_equipe_id" required>
-                                @foreach ($membres as $membre)
-                                    <option value="{{ $membre->id }}">{{ $membre->utilisateur->first_name }} {{ $membre->utilisateur->name }}</option>
-                                @endforeach
-                            </select>
-                        </label>
-                        <label class="task-form__field">Échéance<input name="date_echeance" type="date"></label>
-                        <button class="task-form__submit" type="submit">Ajouter la tâche</button>
-                    </form>
-                </details>
+                <button type="button" class="btn btn-new-task" onclick="openNewTaskModal()">
+                    <span style="font-size:16px; line-height:1;">+</span> Nouvelle tâche
+                </button>
             </div>
 
         @php
@@ -183,6 +168,52 @@
         </div>
     </div>
 
+    {{-- modale flottante de creation de tache au centre --}}
+    <div id="new-task-modal" class="task-modal" onclick="if(event.target === this) closeNewTaskModal()">
+        <div class="task-modal__card new-task-modal__card">
+            <div class="new-task-modal__header">
+                <h2>Nouvelle tâche</h2>
+                <button type="button" onclick="closeNewTaskModal()" class="btn-close-modal" aria-label="Fermer">&times;</button>
+            </div>
+
+            <form method="POST" action="{{ route('tasks.store') }}" novalidate class="new-task-modal__form">
+                @csrf
+                <input type="hidden" name="equipe_id" value="{{ $equipeId }}">
+
+                <div class="field">
+                    <label for="new-task-titre">Titre de la tâche *</label>
+                    <input id="new-task-titre" name="titre" required maxlength="255" placeholder="Ex: Rédiger le rapport mensuel" class="input">
+                </div>
+
+                <div class="field">
+                    <label for="new-task-desc">Description</label>
+                    <textarea id="new-task-desc" name="description" rows="3" placeholder="Détails ou consignes pour la tâche..." class="input"></textarea>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="field">
+                        <label for="new-task-resp">Responsable *</label>
+                        <select id="new-task-resp" name="membre_equipe_id" required class="input">
+                            @foreach ($membres as $membre)
+                                <option value="{{ $membre->id }}">{{ $membre->utilisateur->first_name }} {{ $membre->utilisateur->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="new-task-date">Date d'échéance</label>
+                        <input id="new-task-date" name="date_echeance" type="date" class="input">
+                    </div>
+                </div>
+
+                <div class="new-task-modal__footer">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="closeNewTaskModal()" style="padding: 8px 18px;">Annuler</button>
+                    <button type="submit" class="btn btn-primary btn-sm" style="padding: 8px 20px;">Ajouter la tâche</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- modales flottantes pour chaque tache au clic --}}
     @foreach ($taches as $t)
         @php
@@ -248,6 +279,20 @@
 
 @push('scripts')
     <script>
+        function openNewTaskModal() {
+            const modal = document.getElementById('new-task-modal');
+            if (modal) {
+                modal.classList.add('is-open');
+                const input = document.getElementById('new-task-titre');
+                if (input) setTimeout(() => input.focus(), 60);
+            }
+        }
+
+        function closeNewTaskModal() {
+            const modal = document.getElementById('new-task-modal');
+            if (modal) modal.classList.remove('is-open');
+        }
+
         function openTaskModal(id) {
             const modal = document.getElementById('task-modal-' + id);
             if (modal) modal.classList.add('is-open');
