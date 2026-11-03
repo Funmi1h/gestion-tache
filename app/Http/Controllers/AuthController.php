@@ -11,6 +11,7 @@ class AuthController extends Controller
     public function showRegister(Request $request)
     {
         return view('auth.register', [
+            //ce token je le mets dans un input de type hidden dans le formulaire d'inscription
             'invitationToken' => $request->query('invitation_token'),
         ]);
     }

@@ -2,35 +2,28 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TacheController;
+use App\Models\Invitation;
 use Illuminate\Support\Facades\Route;
+
+//les routes publiques d'abord 
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-//pour le lien d'invitation
-//en fait la fonction prend un token (le token du lien d'invitation )
-Route::get('/invitation/accepter{token}', function($token){
+// le lien pour accepter une invitation a rejoindre une équipe
+Route::get('/invitations/accepter/{token}', function ($token) {
     $invitation = Invitation::with('equipe', 'inviteur')
-    ->where('token', $token)
-    ->where('statut', 'en_attente')
-    ->where('date_expiration', now())
-    ->firstOrFail();
+        ->where('token', $token)
+        ->where('statut', 'en_attente')
+        ->where('date_expiration', '>', now())
+        ->firstOrFail();
 
-    return 
-    view('invitations.rejoindre', compact('invitation'))
-})->name('invitation_rejoindre');
+    return view('invitations.rejoindre', compact('invitation'));
+})->name('invitations.rejoindre');
 
-Route::view('/dashboard', 'dashboard.index')->name('dashboard');
 
-//les routes pour les taches
-Route::view('/taches', 'tasks')->name('tasks');
-
-//les routes pour les équipes
-Route::view('/equipe/create', 'equipes.create')->name('equipes.create');
-Route::view('/equipe', 'equipes.index')->name('equipes.');
-
-//en fait ce middleware redirige vers le dashboard quand la personne est déja connectée
+//ces pages sont pour les visiteurs non connetés on les redirige vers ici quand ils veulent avoir acces a des pages ou il faudrait se connectér 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
@@ -39,14 +32,19 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
 });
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-<<<<<<< HEAD
-
-=======
-Route::get('/taches', [TacheController::class, 'index'])->name('tasks');
-
+//les pages auquel l'aaces est restreint a une authentification
 Route::middleware('auth')->group(function () {
+    
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::view('/dashboard', 'dashboard.index')->name('dashboard');
+
+    Route::view('/equipes/creer', 'equipes.create')->name('equipes.create');
+    Route::view('/equipes', 'equipes.index')->name('equipes.index');
+
+    //crud des taches 
+    Route::get('/taches', [TacheController::class, 'index'])->name('tasks');
     Route::get('/taches/creer', [TacheController::class, 'create'])->name('tasks.create');
     Route::post('/taches', [TacheController::class, 'store'])->name('tasks.store');
     Route::get('/taches/{tache}/modifier', [TacheController::class, 'edit'])->name('tasks.edit');
@@ -55,4 +53,3 @@ Route::middleware('auth')->group(function () {
     Route::delete('/taches/{tache}', [TacheController::class, 'destroy'])->name('tasks.destroy');
     Route::patch('/taches/{tache}/statut', [TacheController::class, 'updateStatut'])->name('tasks.status');
 });
->>>>>>> origin/primael
