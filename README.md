@@ -1,58 +1,117 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Taskflow — Gestion de Tâches en Équipe
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+### Contexte  
+Une application web collaborative conçue pour faciliter l'organisation, le suivi et la répartition des tâches au sein d'équipes de travail restreintes (jusqu'à 6 collaborateurs).
+Réalisé dans le cadre d'un projet de développement avec le framework **Laravel**, ce projet met en œuvre les bonnes pratiques d'architecture MVC, une sécurité stricte des rôles (Admin/Membre), un système d'invitations sécurisé par jeton unique et e-mail (Mailpit), un tableau de bord analytique en temps réel, ainsi qu'un espace de travail opérationnel sous forme de tableau **Kanban**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Fonctionnalités
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+* **Authentification & Profils :** Inscription, connexion sécurisée et déconnexion avec gestion du nom et prénom.
+* **Gestion des Équipes :** Création d'équipes avec attribution automatique du rôle `ADMIN` au créateur et limitation stricte à **6 membres par équipe** (CDC §3.2).
+* **Système d'Invitations par E-mail :** Envoi d'invitations par e-mail avec un jeton sécurisé unique (expiration sous 7 jours), gestion des statuts (en attente, acceptée, annulée, expirée) et protection contre l'usurpation d'adresse e-mail.
+* **Tableau de Bord & KPIs en Temps Réel :** Indicateurs clés de performance (Total, À faire, En cours, Terminées, En retard), barre d'avancement global de l'équipe, jauge de répartition de la charge par membre et section dédiée « Mes tâches ».
+* **Espace Kanban Opérationnel :** Tableau Kanban à 3 colonnes de flux (*À faire*, *En cours*, *Terminées*) avec déplacement dynamique des tâches selon leur statut.
+* **Alertes de Retard Visuelles :** Détection automatique des tâches en retard avec badge d'alerte et filtre instantané *« En retard uniquement »*.
+* **Permissions & Règles Métier :** Seul le responsable d'une tâche peut modifier son statut en *Terminée* ou *En cours* (CDC §6.2) ; seuls le créateur de la tâche ou l'admin de l'équipe peuvent la modifier ou la supprimer.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Prérequis
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- [PHP](https://www.php.net/) (version 8.2 ou supérieure)
+- [Composer](https://getcomposer.org/)
+- [MySQL](https://www.mysql.com/)
+- [Mailpit](https://github.com/axllent/mailpit) (pour tester la réception locale des e-mails d'invitation)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Installation
 
-## Agentic Development
+### 1. Cloner le dépôt
+<pre>
+git clone https://github.com/votre-utilisateur/gestion-taches.git
+cd gestion-taches
+</pre>
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 2. Installer les dépendances PHP
+<pre>
+composer install
+</pre>
 
-```bash
-composer require laravel/boost --dev
+### 3. Configurer les variables d'environnement
+Dupliquez le fichier `.env.example` en `.env` :
+<pre>
+cp .env.example .env
+</pre>
 
-php artisan boost:install
+Ouvrez le fichier `.env` et ajustez vos paramètres de base de données et de messagerie :
+```dotenv
+APP_NAME=Taskflow
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=gestion_taches
+DB_USERNAME=root
+DB_PASSWORD=votre_mot_de_passe
+
+# Configuration Mailpit pour les e-mails locaux
+MAIL_MAILER=smtp
+MAIL_HOST=127.0.0.1
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_FROM_ADDRESS="noreply@taskflow.com"
+MAIL_FROM_NAME="Taskflow"
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 4. Générer la clé d'application
+<pre>
+php artisan key:generate
+</pre>
 
-## Contributing
+### 5. Effectuer les migrations de la base de données
+<pre>
+php artisan migrate
+</pre>
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 6. Charger les données de démonstration (Seeders)
+Pour initialiser l'application avec des équipes, des collaborateurs et des tâches réalistes :
+<pre>
+php artisan db:seed
+</pre>
 
-## Code of Conduct
+### 7. Démarrer le serveur de développement
+<pre>
+php artisan serve
+</pre>
+L'application est accessible sur : **http://localhost:8000**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Si vous testez les e-mails d'invitation, lancez Mailpit en arrière-plan 
+<pre>
+mailpit
+</pre>
+Et ouvrez l'interface web sur **http://localhost:8025**.
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Exécution des Tests
 
-## License
+Pour vérifier la conformité du code et le bon fonctionnement des règles métier :
+<pre>
+php artisan test
+</pre>
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## Comptes de Démonstration (Jeu de test)
+
+| Nom & Prénom | Adresse E-mail | Mot de passe | Rôle principal |
+| :--- | :--- | :---: | :--- |
+| **Héloïse Akohou** | `ak.heloise2007@gmail.com` | `password` | **ADMIN** de l'Équipe Marketing |
+| **Endedans Ici** | `ici.endedans@gmail.com` | `password` | **ADMIN** de l'Équipe Refonte Web |
+| **Marc Dupont** | `marc.dupont@taskflow.test` | `password` | **Membre** collaborateur |
+| **Sarah Martin** | `sarah.martin@taskflow.test` | `password` | **Membre** (avec tâche en retard) |
