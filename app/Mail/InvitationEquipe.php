@@ -43,7 +43,8 @@ class InvitationEquipe extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.inviation',
+            //vu que $invitation est public il sera directement transmis 
+            view: 'emails.invitation',
         );
     }
 

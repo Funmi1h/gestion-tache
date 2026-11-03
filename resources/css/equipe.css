@@ -1,0 +1,110 @@
+/* grille de la liste des équipes */
+.equipes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.equipe-card {
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--line, #e2e8f0);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.equipe-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.equipe-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-main, #0f172a);
+    text-decoration: none;
+}
+
+.equipe-desc {
+    font-size: 13px;
+    color: var(--text-muted, #64748b);
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.equipe-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--line, #e2e8f0);
+    padding-top: 12px;
+    font-size: 13px;
+}
+
+/* ca c'est pour le badge des roles */
+.badge-role {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.badge-role.admin {
+    background: var(--role-admin-bg, #ede9fe);
+    color: var(--role-admin-txt, #5b21b6);
+}
+
+.badge-role.membre {
+    background: var(--role-member-bg, #e0f2fe);
+    color: var(--role-member-txt, #075985);
+}
+
+/* Ppage de détail genre le show ca a deux colonnes */
+.show-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+}
+
+@media(max-width: 900px) {
+    .show-layout { grid-template-columns: 1fr; }
+}
+
+.gauge-box {
+    background: var(--bg-page, #f8fafc);
+    border: 1px solid var(--line, #e2e8f0);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.gauge-count {
+    font-weight: 600;
+    color: var(--primary, #2563eb);
+}
+
+.gauge-count.full {
+    color: #d9480f;
+}
+
+.member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line, #e2e8f0);
+}
+
+.member-item:last-child {
+    border-bottom: 0;
+}
