@@ -354,7 +354,100 @@ body.authpage .shell {
 }
 
 
-/* --- Page d'accueil (Hero) --- */
+/* --- Page d'accueil (Hero moderne) --- */
+.main-content--home {
+    max-width: 1100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 92vh;
+    padding: 40px 32px;
+}
+
+.welcome-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 60px;
+    width: 100%;
+}
+
+.welcome-logo-box {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-shrink: 0;
+    margin-top: -16px;
+}
+
+.welcome-logo-ball {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #F7C8D9, var(--primary, #C83F74));
+    box-shadow: 0 12px 28px rgba(200, 63, 116, 0.28);
+}
+
+.welcome-logo-text {
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--text-main, #0F172A);
+    letter-spacing: -0.5px;
+}
+
+.welcome-content {
+    flex: 1;
+    max-width: 620px;
+    text-align: left;
+}
+
+.welcome-title {
+    font-size: clamp(32px, 4vw, 44px);
+    font-weight: 800;
+    line-height: 1.22;
+    color: var(--text-main, #0F172A);
+    margin: 0 0 18px 0;
+    letter-spacing: -0.5px;
+}
+
+.welcome-subtitle {
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-muted, #64748B);
+    margin: 0 0 32px 0;
+}
+
+.welcome-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.welcome-actions .btn {
+    padding: 13px 26px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+@media (max-width: 840px) {
+    .welcome-hero {
+        flex-direction: column;
+        text-align: center;
+        gap: 32px;
+    }
+
+    .welcome-content {
+        text-align: center;
+    }
+
+    .welcome-actions {
+        justify-content: center;
+    }
+}
+
 .hero-landing {
     min-height: calc(75vh - 64px);
     display: flex;

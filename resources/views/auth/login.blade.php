@@ -29,13 +29,13 @@
 
         <div class="field">
             <label for="email">Adresse e-mail</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus class="auth-input">
+            <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="nom@exemple.com" autocomplete="username" required autofocus class="auth-input">
         </div>
 
         <div class="field">
             <label for="password">Mot de passe</label>
             <div class="password-wrapper">
-                <input id="password" type="password" name="password" required class="auth-input">
+                <input id="password" type="password" name="password" placeholder="Votre mot de passe" autocomplete="current-password" required class="auth-input">
                 <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('password', this)" aria-label="Afficher le mot de passe" aria-pressed="false">
                     <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>

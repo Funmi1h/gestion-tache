@@ -18,49 +18,51 @@
 <body>
 <div class="app-shell">
 
-    {{-- En-tête & Barre de navigation --}}
-    <header class="top-nav">
-        <a href="{{ route('home') }}" class="brand">
-            <span class="logo"></span>
-            Taskflow
-        </a>
+    {{-- En-tête & Barre de navigation (masquée sur l'accueil) --}}
+    @unless (request()->routeIs('home'))
+        <header class="top-nav">
+            <a href="{{ route('home') }}" class="brand">
+                <span class="logo"></span>
+                Taskflow
+            </a>
 
 
-        <nav class="nav-tabs" aria-label="Navigation principale">
-            @php
-                $tabs = [
-                    'Tableau de bord' => 'dashboard',
-                    'Mes Équipes'     => 'equipes.index',
-                    'Tâches'          => 'tasks',
-                ];
-            @endphp
-            @foreach ($tabs as $label => $name)
-                <a href="{{ Route::has($name) ? route($name) : '#' }}" 
-                   @class(['nav-link', 'active' => request()->routeIs($name . '*')])>
-                    {{ $label }}
-                </a>
-            @endforeach
-        </nav>
+            <nav class="nav-tabs" aria-label="Navigation principale">
+                @php
+                    $tabs = [
+                        'Tableau de bord' => 'dashboard',
+                        'Mes Équipes'     => 'equipes.index',
+                        'Tâches'          => 'tasks',
+                    ];
+                @endphp
+                @foreach ($tabs as $label => $name)
+                    <a href="{{ Route::has($name) ? route($name) : '#' }}" 
+                       @class(['nav-link', 'active' => request()->routeIs($name . '*')])>
+                        {{ $label }}
+                    </a>
+                @endforeach
+            </nav>
 
-        <div class="user-actions">
-            @auth
-                <span class="user-name">
-                    {{ auth()->user()->first_name ?? auth()->user()->name }}
-                </span>
-                <form method="POST" action="{{ route('logout') }}" class="logout-form">
+            <div class="user-actions">
+                @auth
+                    <span class="user-name">
+                        {{ auth()->user()->first_name ?? auth()->user()->name }}
+                    </span>
+                    <form method="POST" action="{{ route('logout') }}" class="logout-form">
 
-                    @csrf
-                    <button type="submit" class="btn-logout">Déconnexion</button>
-                </form>
-            @else
-                <a href="{{ route('login') }}" class="btn-link">Connexion</a>
-                <a href="{{ route('register') }}" class="btn btn-primary btn-sm">S'inscrire</a>
-            @endauth
-        </div>
-    </header>
+                        @csrf
+                        <button type="submit" class="btn-logout">Déconnexion</button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="btn-link">Connexion</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary btn-sm">S'inscrire</a>
+                @endauth
+            </div>
+        </header>
+    @endunless
 
     {{-- Contenu principal --}}
-    <main class="main-content">
+    <main @class(['main-content', 'main-content--home' => request()->routeIs('home')])>
         @hasSection('heading')
             <div class="page-heading">
                 <h1>@yield('heading')</h1>

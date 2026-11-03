@@ -35,24 +35,24 @@
         <div class="auth-name-grid">
             <div class="field">
                 <label for="name">Nom *</label>
-                <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus class="auth-input">
+                <input id="name" name="name" type="text" value="{{ old('name') }}" placeholder="Dupont" required autofocus class="auth-input">
             </div>
             <div class="field">
                 <label for="first_name">Prénom *</label>
-                <input id="first_name" name="first_name" type="text" value="{{ old('first_name') }}" required class="auth-input">
+                <input id="first_name" name="first_name" type="text" value="{{ old('first_name') }}" placeholder="Jean" required class="auth-input">
             </div>
         </div>
 
         <div class="field">
             <label for="email">Adresse e-mail *</label>
-            <input id="email" name="email" type="email" value="{{ old('email', request('email')) }}" required class="auth-input">
+            <input id="email" name="email" type="email" value="{{ old('email', request('email')) }}" placeholder="nom@exemple.com" required class="auth-input">
         </div>
 
         {{-- 1. Mot de passe --}}
         <div class="field">
             <label for="password">Mot de passe * (min. 8 caractères)</label>
             <div class="password-wrapper">
-                <input id="password" name="password" type="password" required class="auth-input">
+                <input id="password" name="password" type="password" placeholder="Au moins 8 caractères" required class="auth-input">
                 <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('password', this)" aria-label="Afficher/Masquer le mot de passe">
                     {{-- Icône œil ouvert par défaut --}}
                     <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -67,7 +67,7 @@
         <div class="field">
             <label for="password_confirmation">Confirmer le mot de passe *</label>
             <div class="password-wrapper">
-                <input id="password_confirmation" name="password_confirmation" type="password" required class="auth-input">
+                <input id="password_confirmation" name="password_confirmation" type="password" placeholder="Répétez le mot de passe" required class="auth-input">
                 <button type="button" class="btn-toggle-password" onclick="togglePasswordVisibility('password_confirmation', this)" aria-label="Afficher/Masquer la confirmation">
                     <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>

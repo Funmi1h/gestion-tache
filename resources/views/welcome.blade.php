@@ -3,31 +3,38 @@
 @section('title', 'Bienvenue sur Taskflow · Gestion de tâches')
 
 @section('content')
-<div class="hero-landing">
-    <span class="hero-badge">Collaboration simple & efficace</span>
-    
-    <h1 class="hero-title">Centralisez et organisez le travail de votre équipe.</h1>
-    
-    <p class="hero-subtitle">
-        Créez vos équipes, invitez vos collaborateurs, répartissez les tâches et suivez la progression en temps réel.
-    </p>
+<div class="welcome-hero">
+    {{-- logo agrandi descendu un peu vers le bas --}}
+    <div class="welcome-logo-box">
+        <span class="welcome-logo-ball"></span>
+        <span class="welcome-logo-text">Taskflow</span>
+    </div>
 
-    <div class="hero-actions">
-        @auth
-            <a href="{{ route('dashboard') }}" class="btn btn-primary">
-                Accéder à mon tableau de bord &rarr;
-            </a>
-            <a href="{{ route('equipes.index') }}" class="btn btn-outline">
-                Mes Équipes
-            </a>
-        @else
-            <a href="{{ route('register') }}" class="btn btn-primary">
-                Créer un compte gratuitement
-            </a>
-            <a href="{{ route('login') }}" class="btn btn-outline">
-                Se connecter
-            </a>
-        @endauth
+    {{-- textes a droite avec boutons en dessous --}}
+    <div class="welcome-content">
+        <h1 class="welcome-title">Centralisez et organisez le travail de votre équipe.</h1>
+        
+        <p class="welcome-subtitle">
+            Créez vos équipes, invitez vos collaborateurs, répartissez les tâches et suivez la progression en temps réel.
+        </p>
+
+        <div class="welcome-actions">
+            @auth
+                <a href="{{ route('dashboard') }}" class="btn btn-primary">
+                    Tableau de bord &rarr;
+                </a>
+                <a href="{{ route('equipes.index') }}" class="btn btn-outline">
+                    Mes Équipes
+                </a>
+            @else
+                <a href="{{ route('register') }}" class="btn btn-primary">
+                    S'inscrire
+                </a>
+                <a href="{{ route('login') }}" class="btn btn-outline">
+                    Connexion
+                </a>
+            @endauth
+        </div>
     </div>
 </div>
 @endsection
