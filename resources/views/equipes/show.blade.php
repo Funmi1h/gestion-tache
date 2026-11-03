@@ -17,7 +17,8 @@
 @php
     $membreActuel = $equipe->membres->firstWhere('id', auth()->id());
     $monRole = $membreActuel ? $membreActuel->pivot->role : 'MEMBRE';
-    $isAdmin = ($monRole === 'ADMIN');
+    // l'admin ou le createur de l'equipe a les droits d'administration
+    $isAdmin = (strtolower($monRole) === 'admin' || (int) $equipe->createur_id === (int) auth()->id());
 
     $invitationsEnAttente = $equipe->invitations ? $equipe->invitations->where('statut', 'en_attente') : collect();
     $totalOccupes = $equipe->membres->count() + $invitationsEnAttente->count();
@@ -76,22 +77,21 @@
                 </p>
 
                 @if($peutInviter)
-                    <form method="POST" action="{{ route('equipes.invitations.store', $equipe->id) }}">
+                    <form method="POST" action="{{ route('equipes.invitations.store', $equipe->id) }}" novalidate>
                         @csrf
-                        <div style="margin-bottom:10px;">
-                            <input type="email" name="email" required placeholder="collaborateur@email.com"
-                                   style="width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:13px;">
+                        <div style="margin-bottom:12px;">
+                            <input type="email" name="email" required placeholder="collaborateur@email.com" class="form-input">
                             @error('email')
-                                <span style="color:#d9480f; font-size:11px; display:block; margin-top:4px;">{{ $message }}</span>
+                                <span style="color:#b91c1c; font-size:12px; display:block; margin-top:4px;">{{ $message }}</span>
                             @enderror
                         </div>
-                        <button type="submit" class="btn" style="width:100%; background:var(--primary, #2563EB); color:#fff; border:0; padding:9px; border-radius:8px; font-weight:500; cursor:pointer;">
+                        <button type="submit" class="btn btn-primary" style="width:100%; padding:10px; font-weight:500;">
                             Envoyer l'invitation
                         </button>
                     </form>
                 @else
-                    <div style="background:#fef3c7; color:#92400e; padding:10px; border-radius:8px; font-size:12px;">
-                        ⚠️ Limite de 6 places atteinte. Libérez une place pour pouvoir inviter à nouveau.
+                    <div style="background:#fee2e2; color:#991b1b; padding:10px 14px; border-radius:8px; font-size:12px; border:1px solid #fca5a5;">
+                        Limite de 6 places atteinte. Libérez une place pour pouvoir inviter à nouveau.
                     </div>
                 @endif
             </div>
@@ -107,7 +107,7 @@
                             <span style="overflow:hidden; text-overflow:ellipsis; max-width:180px;">{{ $invitation->email }}</span>
                             <form method="POST" action="{{ route('invitations.annuler', $invitation->id) }}" style="margin:0;">
                                 @csrf
-                                <button type="submit" style="background:none; border:0; color:#d9480f; cursor:pointer; font-size:12px;">
+                                <button type="submit" onclick="return confirm('Annuler cette invitation ?')" style="background:none; border:0; color:#b91c1c; cursor:pointer; font-size:12px; font-weight:500;">
                                     Annuler
                                 </button>
                             </form>

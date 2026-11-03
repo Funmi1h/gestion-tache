@@ -31,56 +31,96 @@ class InvitationController extends Controller
 
 
 
-    //je ne sais pas encore si on va l'utiliser mais ca permet d'ajouter un membre apres création de l'équipe 
-    public function store(Request $request)
+    // pour ajouter un membre apres creation de l'equipe
+    public function store(Request $request, $equipe = null)
     {
-        $request->validate([
-            'equipe_id' => 'required|exists:equipes,id',
+        $equipeId = $equipe ?? $request->input('equipe_id');
+        $validated = $request->validate([
             'email' => 'required|email',
+        ], [
+            'email.required' => 'Veuillez saisir une adresse e-mail.',
+            'email.email' => 'Veuillez saisir une adresse e-mail valide.',
         ]);
 
-        $equipe = Equipe::findOrFail($request->equipe_id);
+        $equipe = Equipe::findOrFail($equipeId);
         $user = $request->user();
 
-        // vérifier si l'utilisateur est bien l'admin de l'équipe
+        // on verifie si l'utilisateur est admin ou createur de l'equipe
         $membreConnecte = $equipe->membres()->where('user_id', $user->id)->first();
-        if (!$membreConnecte || $membreConnecte->pivot->role !== 'admin') {
-            return response()->json(['message' => 'Action non autorisée. Vous devez être l\'admin.'], 403);
+        $isAdmin = ($membreConnecte && strtolower($membreConnecte->pivot->role) === 'admin') || ((int) $equipe->createur_id === (int) $user->id);
+        if (!$isAdmin) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Action non autorisée. Vous devez être l\'admin.'], 403);
+            }
+            abort(403, 'Action non autorisée. Vous devez être l\'admin de l\'équipe.');
         }
 
-        //  la limite de 6 membres
-        if ($equipe->membres()->count() >= 6) {
-            return response()->json(['message' => 'L\'équipe a atteint sa limite de 6 membres.'], 422);
+        // verifier si l'utilisateur est deja membre
+        if ($equipe->membres()->where('email', $validated['email'])->exists()) {
+            return back()->withErrors(['email' => 'Cet utilisateur fait déjà partie de l\'équipe.']);
         }
 
-        //on crre l'inviation
-        $this->creerInvitation($equipe->id, $request->email, $user->id);
+        // verifier si une invitation en attente existe deja
+        $dejaInvite = $equipe->invitations()
+            ->where('email', $validated['email'])
+            ->where('statut', 'en_attente')
+            ->where('date_expiration', '>', now())
+            ->exists();
+        if ($dejaInvite) {
+            return back()->withErrors(['email' => 'Une invitation est déjà en cours pour cette adresse e-mail.']);
+        }
 
-        return response()->json(['message' => 'Invitation envoyée avec succès !']);
+        // verification de la limite des 6 places
+        $totalOccupes = $equipe->membres()->count() + $equipe->invitations()->where('statut', 'en_attente')->count();
+        if ($totalOccupes >= 6) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'L\'équipe a atteint sa limite de 6 membres.'], 422);
+            }
+            return back()->withErrors(['email' => 'L\'équipe a déjà atteint sa limite maximale de 6 membres.']);
+        }
+
+        // on cree l'invitation et envoie le mail
+        $this->creerInvitation($equipe->id, $validated['email'], $user->id);
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Invitation envoyée avec succès !']);
+        }
+
+        return back()->with('status', 'Invitation envoyée avec succès.');
     }
-    // annuler une invitation (Réservé à l'ADMIN de l'équipe)
- 
+
+    // annuler une invitation (pour l'admin de l'équipe)
     public function annulerInvitation($id, Request $request)
     {
         $invitation = Invitation::findOrFail($id);
-        $equipe = \App\Models\Equipe::findOrFail($invitation->equipe_id);
+        $equipe = Equipe::findOrFail($invitation->equipe_id);
 
-        // Sécurité : Seul le créateur/ADMIN de l'équipe peut annuler l'invitation
-        // On va chercher le rôle de l'utilisateur connecté dans la table pivot pour cette équipe
+        // seul le createur ou l'admin peut annuler
         $membreConnecte = $equipe->membres()->where('user_id', $request->user()->id)->first();
+        $isAdmin = ($membreConnecte && strtolower($membreConnecte->pivot->role) === 'admin') || ((int) $equipe->createur_id === (int) $request->user()->id);
         
-        if (!$membreConnecte || $membreConnecte->pivot->role !== 'admin') {
-            return response()->json(['message' => 'Action non autorisée. Vous devez être l\'admin de l\'équipe.'], 403);
+        if (!$isAdmin) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Action non autorisée. Vous devez être l\'admin de l\'équipe.'], 403);
+            }
+            abort(403, 'Action non autorisée. Vous devez être l\'admin de l\'équipe.');
         }
 
         if ($invitation->statut !== 'en_attente') {
-            return response()->json(['message' => 'Cette invitation ne peut plus être annulée.'], 422);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Cette invitation ne peut plus être annulée.'], 422);
+            }
+            return back()->withErrors(['error' => 'Cette invitation ne peut plus être annulée.']);
         }
 
-        // Changement de statut vers annulée
+        // changement de statut vers annulee
         $invitation->update(['statut' => 'annulee']);
 
-        return response()->json(['message' => 'L\'invitation a été annulée avec succès.']);
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'L\'invitation a été annulée avec succès.']);
+        }
+
+        return back()->with('status', 'L\'invitation a été annulée avec succès.');
     }
 
 // marquer comme "expiree" les invitations dépassées de facon automatique 

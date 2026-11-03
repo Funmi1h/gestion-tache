@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/equipes.css') }}?v={{ time() }}">
+@endpush
+
 @section('title', 'Créer une équipe · Taskflow')
 @section('heading', 'Créer une nouvelle équipe')
 
@@ -52,10 +56,10 @@
         </div>
 
         <div class="form-footer">
-            <button type="submit" class="btn btn-dark" style="background:var(--primary); color:#fff; padding:10px 20px; border-radius:8px; border:0; cursor:pointer;">
+            <button type="submit" class="btn btn-primary" style="padding:10px 22px;">
                 Créer l'équipe et envoyer les invitations
             </button>
-            <a href="{{ route('equipes.index') }}" class="link" style="color:var(--text-muted); text-decoration:none;">
+            <a href="{{ route('equipes.index') }}" class="btn btn-outline" style="padding:10px 20px; text-decoration:none;">
                 Annuler
             </a>
         </div>

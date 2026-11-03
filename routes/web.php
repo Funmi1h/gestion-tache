@@ -52,6 +52,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/equipes/creer', [EquipeController::class, 'create'])->name('equipes.create');
     Route::post('/equipes', [EquipeController::class, 'store'])->name('equipes.store');
     Route::get('/equipes/{equipe}', [EquipeController::class, 'show'])->name('equipes.show');
+    Route::post('/equipes/{equipe}/invitations', [InvitationController::class, 'store'])->name('equipes.invitations.store');
+    Route::post('/invitations/{id}/annuler', [InvitationController::class, 'annulerInvitation'])->name('invitations.annuler');
     
     //crud des taches 
     Route::get('/taches', [TacheController::class, 'index'])->name('tasks');
