@@ -187,33 +187,6 @@
             </p>
         @endif
     </div>
-        <h2 style="font-size:16px; font-weight:600; margin-bottom:16px;">
-            Répartition des tâches par membre — {{ $equipeCourante->nom }}
-        </h2>
-
-        @if(!empty($membresStats) && count($membresStats) > 0 && ($stats['total'] ?? 0) > 0)
-            <div style="display:flex; flex-direction:column; gap:16px;">
-                @foreach($membresStats as $ms)
-                    @php
-                        $pourcent = round(($ms['tasks_count'] / $stats['total']) * 100);
-                    @endphp
-                    <div>
-                        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:500;">
-                            <span>{{ $ms['name'] }}</span>
-                            <span style="color:var(--text-muted);">{{ $ms['tasks_count'] }} tâche(s) ({{ $pourcent }}%)</span>
-                        </div>
-                        <div class="progress-track">
-                            <div class="progress-fill" style="width: {{ $pourcent }}%;"></div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @else
-            <p style="color:var(--text-muted); font-size:14px; margin:0;">
-                Aucune tâche n'est encore enregistrée pour cette équipe.
-            </p>
-        @endif
-    </div>
 
 @endif
 
